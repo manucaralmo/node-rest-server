@@ -1,37 +1,39 @@
+
+// REQUIRES
 require('./config/config.js');
 const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
+const mongoose = require('mongoose');
+// REQUIRES
+
 
 //BODYPARSE MIDDLEWARES
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+//BODYPARSE MIDDLEWARES
 
  
-app.post('/usuario', function (req, res) {
-    let body = req.body;
+// RUTAS
+app.use( require('./routes/usuario') );
+// RUTAS
 
-    if(body.nombre === undefined){
-        res.status(400).json({
-            ok: false,
-            mensaje: "Faltan campos obligatorios"
-        });
-    } else {
-        res.json({
-            usuario: body
-        });
-    }
+mongoose.connect(process.env.URLDB, {
+    useUnifiedTopology: true,
+    useNewUrlParser: true,
+    useFindAndModify: false,
+    useCreateIndex: true
 });
-
-app.post('/usuario/:id', function (req, res) {
-    let id = req.params.id
-    res.json({
-        id
-    })
-  })
- 
+const db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function() {
+    console.log("Conectado a Mongo");
+});
+// CONEXION BD
 
 
+// CONEXION PUERTO
 app.listen(process.env.PORT, () => {
     console.log('Escuchando en el puerto 3000');
-})
+});
+// CONEXION PUERTO
