@@ -2,7 +2,7 @@
 const express = require('express');
 const app = express();
 const Usuario = require('../models/usuario');
-const { response } = require('express');
+const { verificaToken, verificaAdminRole } = require('../middlewares/autenticacion');
 const bcrypt = require('bcrypt');
 const _ = require('underscore');
 // REQUIRES
@@ -10,7 +10,7 @@ const _ = require('underscore');
 // =================================================================
 
 // LISTAR USUARIOS
-app.get('/usuarios', function (req, res) {
+app.get('/usuarios', verificaToken, (req, res) => {
 
     let desde = req.query.desde || 0;
     desde = Number(desde);
@@ -29,7 +29,7 @@ app.get('/usuarios', function (req, res) {
                     });
                 }
 
-                Usuario.count({ estado: true }, (err, conteo) => {
+                Usuario.countDocuments({ estado: true }, (err, conteo) => {
                     res.json({
                         ok: true,
                         usuarios,
@@ -43,7 +43,7 @@ app.get('/usuarios', function (req, res) {
 // =================================================================
 
 // CREAR UN USUARIO
-app.post('/usuario', function (req, res) {
+app.post('/usuario', [verificaToken, verificaAdminRole], function (req, res) {
     let body = req.body;
 
     let usuario = new Usuario({
@@ -74,7 +74,7 @@ app.post('/usuario', function (req, res) {
 // =================================================================
 
 // EDITAR UN USUARIO
-app.put('/usuario/:id', function (req, res) {
+app.put('/usuario/:id', [verificaToken, verificaAdminRole], function (req, res) {
     let id = req.params.id;
     let body = _.pick( req.body, ['nombre', 'email', 'img', 'role', 'estado']);
 
@@ -102,7 +102,7 @@ app.put('/usuario/:id', function (req, res) {
 // ELIMINAR UN USUARIO
 // No eliminamos, sino que cambiamos estado a false
 // PARA ELIMINAR --> Usuario.findByIdAndDelete( id, (err, usuarioDB) => {
-app.delete('/usuario/:id', function (req, res) {
+app.delete('/usuario/:id', [verificaToken, verificaAdminRole], function (req, res) {
     let id = req.params.id;
 
     let cambiarEstado = {

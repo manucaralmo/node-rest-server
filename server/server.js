@@ -5,6 +5,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
 const mongoose = require('mongoose');
+const path = require('path');
 // REQUIRES
 
 
@@ -13,11 +14,15 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 //BODYPARSE MIDDLEWARES
 
+// HABILITAR PUBLIC
+app.use( express.static( path.resolve(__dirname , '../public') ) );
  
 // RUTAS
-app.use( require('./routes/usuario') );
+app.use( require('./routes/index') );
 // RUTAS
 
+
+// CONEXION BD
 mongoose.connect(process.env.URLDB, {
     useUnifiedTopology: true,
     useNewUrlParser: true,
